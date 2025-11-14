@@ -6,6 +6,7 @@ on:
       - "node_backend/**"
       - "Dockerfile"
       - "*.json"
+  workflow_dispatch:
 
 jobs:
   build:
