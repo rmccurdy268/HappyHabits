@@ -5,6 +5,7 @@ on:
     paths:
       - "node_backend/**"
       - "*.json"
+      - ".github/workflows/npm-publish-github-packages.yml"
   workflow_dispatch:
 
 jobs:
@@ -81,6 +82,7 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: "happy-habits-backend"
         run: |
+          cd node_backend
           docker build --platform=linux/arm64 -t $ECR_REGISTRY/$ECR_REPOSITORY:latest dist
           docker tag $ECR_REGISTRY/$ECR_REPOSITORY:latest $ECR_REGISTRY/$ECR_REPOSITORY:${version}
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:${version}
