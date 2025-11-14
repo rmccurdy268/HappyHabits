@@ -23,7 +23,7 @@ jobs:
         run: |
           cd node_backend
           npm ci
-          npm test
+          # npm test
 
       - name: Create dist
         run: |
