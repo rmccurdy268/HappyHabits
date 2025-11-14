@@ -4,5 +4,5 @@ FROM node:${NODE_VERSION}-alpine
 WORKDIR /usr/src/app
 COPY . .
 RUN npm ci
-EXPOSE 80
+EXPOSE 3000
 CMD ["node", "index.js", "80"]
