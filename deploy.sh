@@ -17,5 +17,6 @@ docker rm habitapp || true
 
 echo "Starting new container..."
 docker run -d --name habitapp -p 80:3000 \
-     -e PUBLISHABLE_KEY="$PUBLISHABLE_KEY" \
-     -e SERVICE_ROLE_KEY="$SERVICE_ROLE_KEY" \
+  -e PUBLISHABLE_KEY="$PUBLISHABLE_KEY" \
+  -e SERVICE_ROLE_KEY="$SERVICE_ROLE_KEY" \
+  "$IMAGE_URI"
