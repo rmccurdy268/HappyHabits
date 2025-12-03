@@ -1,165 +1,150 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, ActivityIndicator, TouchableOpacity } from 'react-native';
-import { useState, useEffect } from 'react';
-import { apiService } from './src/api/api';
+import React, { useRef, useEffect } from "react";
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { ActivityIndicator, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { AuthProvider, useAuth } from "./src/context/AuthContext";
+import LoginScreen from "./src/screens/LoginScreen";
+import RegisterScreen from "./src/screens/RegisterScreen";
+import HomeScreen from "./src/screens/HomeScreen";
+import CalendarScreen from "./src/screens/CalendarScreen";
+import AccountSettingsScreen from "./src/screens/AccountSettingsScreen";
+import CreateHabitScreen from "./src/screens/CreateHabitScreen";
+import EditHabitScreen from "./src/screens/EditHabitScreen";
+import FloatingActionButton from "./src/components/FloatingActionButton";
 
-export default function App() {
-  const [data, setData] = useState(null);
-  const [testMessage, setTestMessage] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+const Stack = createNativeStackNavigator();
+const Tab = createBottomTabNavigator();
 
-  // Example: Fetch data on component mount
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const result = await apiService.getData();
-      setData(result);
-    } catch (err) {
-      setError(err.message || 'Failed to fetch data');
-      console.error('Error fetching data:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const testConnection = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      setTestMessage('');
-      const result = await apiService.testConnection();
-      setTestMessage(result);
-    } catch (err) {
-      setError(err.message || 'Failed to test connection');
-      console.error('Error testing connection:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+// Bottom Tab Navigator for main app screens
+function MainTabs() {
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>HappyHabits</Text>
-      <StatusBar style="auto" />
-      
-      {loading && <ActivityIndicator size="large" color="#007AFF" style={styles.loader} />}
-      
-      {error && (
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>Error: {error}</Text>
-          <Text style={styles.errorHint}>
-            Make sure your backend is running on port 3000
-          </Text>
-        </View>
-      )}
+    <View style={{ flex: 1 }}>
+      <Tab.Navigator
+        initialRouteName="HomeTab"
+        screenOptions={({ route }) => ({
+          headerShown: false,
+          tabBarIcon: ({ focused, color, size }) => {
+            let iconName;
 
-      <View style={styles.content}>
-        <TouchableOpacity 
-          style={styles.button} 
-          onPress={testConnection}
-          disabled={loading}
-        >
-          <Text style={styles.buttonText}>Test Connection</Text>
-        </TouchableOpacity>
+            if (route.name === "CalendarTab") {
+              iconName = focused ? "calendar" : "calendar-outline";
+            } else if (route.name === "HomeTab") {
+              iconName = focused ? "home" : "home-outline";
+            } else if (route.name === "SettingsTab") {
+              iconName = focused ? "settings" : "settings-outline";
+            }
 
-        {testMessage && (
-          <View style={styles.resultContainer}>
-            <Text style={styles.resultLabel}>Connection Test:</Text>
-            <Text style={styles.resultText}>{testMessage}</Text>
-          </View>
-        )}
-
-        <TouchableOpacity 
-          style={styles.button} 
-          onPress={fetchData}
-          disabled={loading}
-        >
-          <Text style={styles.buttonText}>Fetch Data</Text>
-        </TouchableOpacity>
-
-        {data && (
-          <View style={styles.resultContainer}>
-            <Text style={styles.resultLabel}>API Data:</Text>
-            <Text style={styles.resultText}>{JSON.stringify(data, null, 2)}</Text>
-          </View>
-        )}
-      </View>
+            return <Ionicons name={iconName} size={size} color={color} />;
+          },
+          tabBarActiveTintColor: "#007AFF",
+          tabBarInactiveTintColor: "#666",
+          tabBarStyle: {
+            paddingBottom: 5,
+            paddingTop: 5,
+            height: 60,
+          },
+        })}
+      >
+        <Tab.Screen
+          name="CalendarTab"
+          component={CalendarScreen}
+          options={{ title: "Progress" }}
+        />
+        <Tab.Screen
+          name="HomeTab"
+          component={HomeScreen}
+          options={{ title: "Home" }}
+        />
+        <Tab.Screen
+          name="SettingsTab"
+          component={AccountSettingsScreen}
+          options={{ title: "Settings" }}
+        />
+      </Tab.Navigator>
+      <FloatingActionButton />
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 30,
-  },
-  content: {
-    width: '100%',
-    maxWidth: 400,
-    alignItems: 'center',
-  },
-  button: {
-    backgroundColor: '#007AFF',
-    padding: 15,
-    borderRadius: 8,
-    marginVertical: 10,
-    width: '100%',
-    alignItems: 'center',
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  loader: {
-    marginVertical: 20,
-  },
-  errorContainer: {
-    backgroundColor: '#ffebee',
-    padding: 15,
-    borderRadius: 8,
-    marginVertical: 10,
-    width: '100%',
-  },
-  errorText: {
-    color: '#c62828',
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 5,
-  },
-  errorHint: {
-    color: '#c62828',
-    fontSize: 12,
-  },
-  resultContainer: {
-    backgroundColor: '#f5f5f5',
-    padding: 15,
-    borderRadius: 8,
-    marginVertical: 10,
-    width: '100%',
-  },
-  resultLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 5,
-    color: '#333',
-  },
-  resultText: {
-    fontSize: 12,
-    color: '#666',
-  },
-});
+function RootNavigator() {
+  const authContext = useAuth();
+  const navigationRef = useRef(null);
+
+  // Ensure we have valid context values, defaulting to false if undefined
+  const isLoading =
+    authContext && typeof authContext.loading === "boolean"
+      ? authContext.loading
+      : true;
+  const isAuth =
+    authContext && typeof authContext.isAuthenticated === "boolean"
+      ? authContext.isAuthenticated
+      : false;
+
+  // Handle navigation when auth state changes
+  useEffect(() => {
+    if (!isLoading && navigationRef.current) {
+      if (isAuth === true) {
+        navigationRef.current.reset({
+          index: 0,
+          routes: [{ name: "MainTabs" }],
+        });
+      } else {
+        navigationRef.current.reset({
+          index: 0,
+          routes: [{ name: "Login" }],
+        });
+      }
+    }
+  }, [isAuth, isLoading]);
+
+  if (isLoading === true) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color="#007AFF" />
+      </View>
+    );
+  }
+
+  // Use a single navigator with all screens, but control initial route
+  const initialRouteName = isAuth === true ? "MainTabs" : "Login";
+
+  return (
+    <NavigationContainer ref={navigationRef}>
+      <Stack.Navigator
+        initialRouteName={initialRouteName}
+        screenOptions={{
+          headerShown: false,
+        }}
+      >
+        {/* Auth screens */}
+        <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen name="Register" component={RegisterScreen} />
+
+        {/* Main app with bottom tabs */}
+        <Stack.Screen name="MainTabs" component={MainTabs} />
+
+        {/* Modal/overlay screens that push over tabs */}
+        <Stack.Screen
+          name="CreateHabit"
+          component={CreateHabitScreen}
+          options={{ presentation: "modal" }}
+        />
+        <Stack.Screen
+          name="EditHabit"
+          component={EditHabitScreen}
+          options={{ presentation: "card" }}
+        />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <RootNavigator />
+    </AuthProvider>
+  );
+}

@@ -28,10 +28,10 @@ Repository for the HappyHabits app, an app to help you track your daily habits a
 |               Goals, WorkLog Set up                |   11/01 (F)    |     10/30     |
 |             ERD and Project Pitch Done             |   11/03 (M)    |     11/03     |
 |               System Design Complete               |   11/04 (T)    |     11/03     |
-|        Behaviors / responsibilities planned        |   11/05 (W)    |     null      |
-|                 Endpoints Planned                  |   11/06 (Th)   |     null      |
-| frontend plans finalized, Notifications researched |   11/07 (F)    |     null      |
-|      Frontend Interface Planned, hosting plan      |   11/08 (S)    |     null      |
+|        Behaviors / responsibilities planned        |   11/05 (W)    |     11/05     |
+|                 Endpoints Planned                  |   11/06 (Th)   |     11/04     |
+| frontend plans finalized, Notifications researched |   11/07 (F)    |     11/10     |
+|      Frontend Interface Planned, hosting plan      |   11/08 (S)    |     11/10     |
 |              build dummydata backend               |   11/10 (M)    |     null      |
 |              working on react native               |   11/11 (T)    |     null      |
 |             notifications basic setup              |   11/12 (W)    |     null      |

@@ -86,3 +86,21 @@ jobs:
           docker build --platform=linux/arm64 -t $ECR_REGISTRY/$ECR_REPOSITORY:latest ./artifact
           docker tag $ECR_REGISTRY/$ECR_REPOSITORY:latest $ECR_REGISTRY/$ECR_REPOSITORY:${version}
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:${version}
+      - name: Copy deploy script to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "./deploy.sh"
+          target: "/home/${{ secrets.EC2_USER }}/deploy.sh"
+
+      - name: Execute remote deploy script
+        uses: appleboy/ssh-action@v1.0.2
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            chmod +x ~/deploy.sh
+            ~/deploy.sh "${{secrets.AWS_ACCOUNT}}.dkr.ecr.${{ secrets.AWS_REGION}}.amazonaws.com/${{secrets.ECR_REPOSITORY}}:${GITHUB_SHA}"

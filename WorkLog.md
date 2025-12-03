@@ -7,4 +7,6 @@
 | 11/01 | 1.0                         | Tech Stack                                         | 5.45                   |
 | 11/01 | 3.30                        | set up expo, backend, wrote sql create table query | 9.15                   |
 | 11/03 | 1.30                        | pitch, finishing design and schedule               | 10.45                  |
+| 11/05 | 2.0                         | frontend design                                    | 12.45                  |
+| 11/14 | 3.5                         | frontend / backup hosting, ci, expo setup          | 16.15                  |
 | date  | time                        | task                                               | cumulative             |
