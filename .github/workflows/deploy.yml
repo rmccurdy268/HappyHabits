@@ -84,7 +84,7 @@ jobs:
           ECR_REPOSITORY: "happy-habits-backend"
         run: |
           ls -R ./artifact   # debug: confirm files exist
-          docker build --platform=linux/arm64 -t $ECR_REGISTRY/$ECR_REPOSITORY:latest ./artifact
+          docker build --platform=linux/amd64 -t $ECR_REGISTRY/$ECR_REPOSITORY:latest ./artifact
           docker tag $ECR_REGISTRY/$ECR_REPOSITORY:latest $ECR_REGISTRY/$ECR_REPOSITORY:${version}
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:${version}
       - name: Copy deploy script to EC2
