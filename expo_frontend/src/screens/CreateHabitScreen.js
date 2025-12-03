@@ -42,6 +42,7 @@ export default function CreateHabitScreen({ navigation, route }) {
   // Form state for custom habit
   const [customForm, setCustomForm] = useState({
     name: "",
+    description: "",
     category_id: null,
     times_per_day: "1",
   });
@@ -126,11 +127,20 @@ export default function CreateHabitScreen({ navigation, route }) {
 
     try {
       setLoading(true);
+      // Get current date in user's local timezone (YYYY-MM-DD format)
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = String(today.getMonth() + 1).padStart(2, "0");
+      const day = String(today.getDate()).padStart(2, "0");
+      const localDate = `${year}-${month}-${day}`;
+
       const habitData = {
         template_id: selectedTemplate.id,
         name: templateForm.name.trim(),
+        description: templateForm.description.trim() || "",
         category_id: templateForm.category_id,
         times_per_day: parseInt(templateForm.times_per_day, 10) || 1,
+        create_date: localDate,
       };
 
       await apiService.createHabit(userProfile.id, habitData);
@@ -157,6 +167,11 @@ export default function CreateHabitScreen({ navigation, route }) {
       return;
     }
 
+    if (!customForm.description.trim()) {
+      Alert.alert("Error", "Description is required");
+      return;
+    }
+
     if (!customForm.category_id) {
       Alert.alert("Error", "Category is required");
       return;
@@ -169,10 +184,19 @@ export default function CreateHabitScreen({ navigation, route }) {
 
     try {
       setLoading(true);
+      // Get current date in user's local timezone (YYYY-MM-DD format)
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = String(today.getMonth() + 1).padStart(2, "0");
+      const day = String(today.getDate()).padStart(2, "0");
+      const localDate = `${year}-${month}-${day}`;
+
       const habitData = {
         name: customForm.name.trim(),
+        description: customForm.description.trim(),
         category_id: customForm.category_id,
         times_per_day: parseInt(customForm.times_per_day, 10) || 1,
+        create_date: localDate,
       };
 
       await apiService.createHabit(userProfile.id, habitData);
@@ -344,6 +368,20 @@ export default function CreateHabitScreen({ navigation, route }) {
                 setCustomForm({ ...customForm, name: text })
               }
               autoCapitalize="words"
+            />
+          </View>
+
+          <View style={styles.section}>
+            <Text style={styles.label}>Description *</Text>
+            <TextInput
+              style={[styles.input, styles.textArea]}
+              placeholder="Description (required)"
+              value={customForm.description}
+              onChangeText={(text) =>
+                setCustomForm({ ...customForm, description: text })
+              }
+              multiline
+              numberOfLines={3}
             />
           </View>
 

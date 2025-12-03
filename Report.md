@@ -24,7 +24,7 @@ _Plan iteratively_
 
 ![HappyHabits ERD](assets/happyHabitsERD.png)
 
-![HappyHabits Tech Stack](assets/happyHabitsTechStack.png)
+![HappyHabits Tech Stack](assets/happyHabitsTechStackV2.png)
 
 _Hopefully moving to ECS with Fargate soon to start scaling_
 

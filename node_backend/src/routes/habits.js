@@ -53,15 +53,22 @@ export default function createHabitsRouter(service) {
           .json({ error: "Category is required for custom habits" });
       }
 
-      const habit = await service.createUserHabit({
+      // Build habit data object, only including create_date if provided
+      const habitData = {
         user_id: req.params.id,
         template_id: template_id || null,
         name,
         description: description || "",
         category_id: finalCategoryId || null,
         times_per_day: times_per_day || 1, // Default to 1 if not provided
-        create_date: create_date || null, // Use provided date or let DB default
-      });
+      };
+
+      // Only include create_date if provided, otherwise let DB use its default
+      if (create_date) {
+        habitData.create_date = create_date;
+      }
+
+      const habit = await service.createUserHabit(habitData);
       res.json(habit);
     } catch (err) {
       res
