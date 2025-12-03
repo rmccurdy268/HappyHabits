@@ -28,4 +28,4 @@ const getBaseURL = () => {
 
 // You can also manually set the base URL here if needed
 //export const API_BASE_URL = "http://192.168.1.6:3000";
-export const API_BASE_URL = "https://happyhabits.rhodric.com:80";
+export const API_BASE_URL = "http://happy-habits-backend.rhodric.com:80";
