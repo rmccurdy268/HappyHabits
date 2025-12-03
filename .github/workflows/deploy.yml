@@ -54,6 +54,7 @@ jobs:
     env:
       version: ${{ needs.build.outputs.version }}
     steps:
+      - uses: actions/checkout@v4
       - name: Download distribution artifact
         uses: actions/download-artifact@v4
         with:
