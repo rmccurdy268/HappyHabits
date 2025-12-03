@@ -104,6 +104,6 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             chmod +x ~/deploy.sh
-            ~/deploy.sh "${{secrets.AWS_ACCOUNT}}.dkr.ecr.${{ secrets.AWS_REGION}}.amazonaws.com/${{secrets.ECR_REPOSITORY}}:${GITHUB_SHA}"
+            ~/deploy.sh "${{secrets.AWS_ACCOUNT}}.dkr.ecr.${{ secrets.AWS_REGION}}.amazonaws.com/${{secrets.ECR_REPOSITORY}}:${{ env.version }}"
 
 #
