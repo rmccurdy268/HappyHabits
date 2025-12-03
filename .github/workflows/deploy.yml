@@ -117,5 +117,3 @@ jobs:
 
             chmod +x ~/deploy.sh
             ~/deploy.sh "$IMAGE_URI"
-
-#
