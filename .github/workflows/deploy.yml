@@ -112,6 +112,10 @@ jobs:
             # Export env vars for deploy.sh
             export AWS_REGION="$REGION"
             export AWS_ACCOUNT="$ACCOUNT"
+            export PUBLISHABLE_KEY="${{ secrets.PUBLISHABLE_KEY }}"
+            export SERVICE_ROLE_KEY="${{ secrets.SERVICE_ROLE_KEY }}"
 
             chmod +x ~/deploy.sh
             ~/deploy.sh "$IMAGE_URI"
+
+#
