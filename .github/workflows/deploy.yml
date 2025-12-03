@@ -33,6 +33,7 @@ jobs:
           cp Dockerfile dist/
           cp -r src dist/
           cp *.json dist/
+          cp server.js dist/
 
       - name: Set version output
         id: set-version
