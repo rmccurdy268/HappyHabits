@@ -103,7 +103,14 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            chmod +x ~/deploy.sh
-            ~/deploy.sh "${{secrets.AWS_ACCOUNT}}.dkr.ecr.${{ secrets.AWS_REGION}}.amazonaws.com/${{secrets.ECR_REPOSITORY}}:${{ env.version }}"
+            REGION="${{ secrets.AWS_REGION }}"
+            ACCOUNT="${{ secrets.AWS_ACCOUNT }}"
+            REGISTRY="$ACCOUNT.dkr.ecr.$REGION.amazonaws.com"
+            IMAGE_URI="$REGISTRY/${{ secrets.ECR_REPOSITORY }}:${{ env.version }}"
 
-#
+            # Export env vars for deploy.sh
+            export AWS_REGION="$REGION"
+            export AWS_ACCOUNT="$ACCOUNT"
+
+            chmod +x ~/deploy.sh
+            ~/deploy.sh "$IMAGE_URI"
