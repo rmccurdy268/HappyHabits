@@ -1,0 +1,119 @@
+name: Node.js Backend deploy to EC2
+
+on:
+  push:
+    paths:
+      - "node_backend/**"
+      - "*.json"
+      - ".github/workflows/deploy.yml"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.set-version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install & test backend
+        run: |
+          cd node_backend
+          npm ci
+          # npm test
+
+      - name: Create dist
+        run: |
+          cd node_backend
+          mkdir -p dist
+          cp Dockerfile dist/
+          cp -r src dist/
+          cp *.json dist/
+          cp server.js dist/
+
+      - name: Set version output
+        id: set-version
+        run: |
+          cd node_backend
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Upload distribution artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: package
+          path: node_backend/dist/
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    needs: build
+    env:
+      version: ${{ needs.build.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download distribution artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: package
+          path: ./artifact # optional, explicitly set a folder
+
+      - name: Create OIDC token to AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          audience: sts.amazonaws.com
+          aws-region: us-east-1
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT }}:role/${{ secrets.CI_IAM_ROLE }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set up machine emulation
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker build
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push container image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: "happy-habits-backend"
+        run: |
+          ls -R ./artifact   # debug: confirm files exist
+          docker build --platform=linux/amd64 -t $ECR_REGISTRY/$ECR_REPOSITORY:latest ./artifact
+          docker tag $ECR_REGISTRY/$ECR_REPOSITORY:latest $ECR_REGISTRY/$ECR_REPOSITORY:${version}
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:${version}
+      - name: Copy deploy script to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "./deploy.sh"
+          target: "/home/${{ secrets.EC2_USER }}/"
+
+      - name: Execute remote deploy script
+        uses: appleboy/ssh-action@v1.0.2
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            REGION="${{ secrets.AWS_REGION }}"
+            ACCOUNT="${{ secrets.AWS_ACCOUNT }}"
+            REGISTRY="$ACCOUNT.dkr.ecr.$REGION.amazonaws.com"
+            IMAGE_URI="$REGISTRY/${{ secrets.ECR_REPOSITORY }}:${{ env.version }}"
+
+            # Export env vars for deploy.sh
+            export AWS_REGION="$REGION"
+            export AWS_ACCOUNT="$ACCOUNT"
+            export PUBLISHABLE_KEY="${{ secrets.PUBLISHABLE_KEY }}"
+            export SERVICE_ROLE_KEY="${{ secrets.SERVICE_ROLE_KEY }}"
+
+            chmod +x ~/deploy.sh
+            ~/deploy.sh "$IMAGE_URI"

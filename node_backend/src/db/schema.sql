@@ -1,76 +1,60 @@
--- ===========================
--- Table: UserData
--- ===========================
-CREATE TABLE IF NOT EXISTS"UserData" (
-    "id" BIGSERIAL PRIMARY KEY,
-    "username" TEXT NOT NULL,
-    "password_hash" TEXT NOT NULL,
-    "email" TEXT NOT NULL UNIQUE,
-    "phone" BIGINT NOT NULL,
-    "preferred_contact_method" VARCHAR(255) NOT NULL CHECK (
-        "preferred_contact_method" IN ('email', 'phone')
-    ),
-    "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    "deleted_at" TIMESTAMP NULL DEFAULT NULL
+-- WARNING: This schema is for context only and is not meant to be run.
+-- Table order and constraints may not be valid for execution.
+
+CREATE TABLE public.Categories (
+  id bigint NOT NULL DEFAULT nextval('"Categories_id_seq"'::regclass),
+  name text NOT NULL,
+  user_id bigint,
+  CONSTRAINT Categories_pkey PRIMARY KEY (id),
+  CONSTRAINT categories_user_id_foreign FOREIGN KEY (user_id) REFERENCES public.UserData(id)
 );
-
--- ===========================
--- Table: HabitTemplate
--- ===========================
-CREATE TABLE IF NOT EXISTS"HabitTemplate" (
-    "id" BIGSERIAL PRIMARY KEY,
-    "name" TEXT NOT NULL UNIQUE,
-    "description" TEXT NOT NULL,
-    "category" TEXT NOT NULL,
-    "default_frequency" VARCHAR(255) NOT NULL CHECK (
-        "default_frequency" IN ('daily', 'weekly', 'monthly')
-    ),
-    "is_public" BOOLEAN NOT NULL DEFAULT TRUE,
-    "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    "deleted_at" TIMESTAMP NULL DEFAULT NULL
+CREATE TABLE public.HabitLogs (
+  id bigint NOT NULL DEFAULT nextval('"HabitLogs_id_seq"'::regclass),
+  user_habit_id bigint NOT NULL,
+  date timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  completed boolean NOT NULL DEFAULT false,
+  notes text,
+  time_completed timestamp without time zone,
+  CONSTRAINT HabitLogs_pkey PRIMARY KEY (id),
+  CONSTRAINT habitlogs_user_habit_id_foreign FOREIGN KEY (user_habit_id) REFERENCES public.UserHabit(id)
 );
-
--- ===========================
--- Table: UserHabit
--- ===========================
-CREATE TABLE IF NOT EXISTS "UserHabit" (
-    "id" BIGSERIAL PRIMARY KEY,
-    "user_id" BIGINT NOT NULL,
-    "template_id" BIGINT,
-    "name" TEXT NOT NULL,
-    "frequency" VARCHAR(255) NOT NULL CHECK (
-        "frequency" IN ('daily', 'weekly', 'monthly')
-    ),
-    "is_active" BOOLEAN NOT NULL DEFAULT TRUE,
-    "create_date" DATE NOT NULL DEFAULT CURRENT_DATE,
-    "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    "deleted_at" TIMESTAMP NULL DEFAULT NULL,
-    CONSTRAINT "userhabit_user_id_foreign" FOREIGN KEY ("user_id")
-        REFERENCES "UserData"("id") ON DELETE CASCADE,
-    CONSTRAINT "userhabit_template_id_foreign" FOREIGN KEY ("template_id")
-        REFERENCES "HabitTemplate"("id") ON DELETE SET NULL
+CREATE TABLE public.HabitTemplate (
+  id bigint NOT NULL DEFAULT nextval('"HabitTemplate_id_seq"'::regclass),
+  name text NOT NULL UNIQUE,
+  description text NOT NULL,
+  created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+  updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+  deleted_at timestamp without time zone,
+  category_id bigint,
+  CONSTRAINT HabitTemplate_pkey PRIMARY KEY (id),
+  CONSTRAINT HabitTemplate_category_id_fkey FOREIGN KEY (category_id) REFERENCES public.Categories(id)
 );
-
-CREATE INDEX IF NOT EXISTS"userhabit_user_id_index" ON "UserHabit"("user_id");
-
--- ===========================
--- Table: HabitLogs
--- ===========================
-CREATE TABLE IF NOT EXISTS "HabitLogs" (
-    "id" BIGSERIAL PRIMARY KEY,
-    "user_habit_id" BIGINT NOT NULL,
-    "date" TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "completed" BOOLEAN NOT NULL DEFAULT FALSE,
-    "notes" TEXT,
-    "time_completed" TIMESTAMP WITHOUT TIME ZONE,
-    "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    "deleted_at" TIMESTAMP NULL DEFAULT NULL,
-    CONSTRAINT "habitlogs_user_habit_id_foreign" FOREIGN KEY ("user_habit_id")
-        REFERENCES "UserHabit"("id") ON DELETE CASCADE
+CREATE TABLE public.UserData (
+  id bigint NOT NULL DEFAULT nextval('"UserData_id_seq"'::regclass),
+  username text NOT NULL,
+  phone bigint NOT NULL,
+  preferred_contact_method character varying NOT NULL CHECK (preferred_contact_method::text = ANY (ARRAY['email'::character varying, 'phone'::character varying]::text[])),
+  created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+  updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+  deleted_at timestamp without time zone,
+  auth_user_id uuid UNIQUE,
+  CONSTRAINT UserData_pkey PRIMARY KEY (id)
 );
-
-CREATE INDEX IF NOT EXISTS "habitlogs_user_habit_id_index" ON "HabitLogs"("user_habit_id");
+CREATE TABLE public.UserHabit (
+  id bigint NOT NULL DEFAULT nextval('"UserHabit_id_seq"'::regclass),
+  user_id bigint NOT NULL,
+  template_id bigint,
+  name text NOT NULL,
+  times_per_day integer NOT NULL DEFAULT 1 CHECK (times_per_day > 0),
+  is_active boolean NOT NULL DEFAULT true,
+  create_date date NOT NULL DEFAULT CURRENT_DATE,
+  created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+  updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+  deleted_at timestamp without time zone,
+  category_id bigint,
+  description text NOT NULL,
+  CONSTRAINT UserHabit_pkey PRIMARY KEY (id),
+  CONSTRAINT userhabit_user_id_foreign FOREIGN KEY (user_id) REFERENCES public.UserData(id),
+  CONSTRAINT userhabit_template_id_foreign FOREIGN KEY (template_id) REFERENCES public.HabitTemplate(id),
+  CONSTRAINT UserHabit_category_id_fkey FOREIGN KEY (category_id) REFERENCES public.Categories(id)
+);
