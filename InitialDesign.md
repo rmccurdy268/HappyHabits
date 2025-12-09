@@ -47,7 +47,7 @@ Repository for the HappyHabits app, an app to help you track your daily habits a
 |                  endpoints built                   |   11/24 (M)    |     null      |
 |                  backend finished                  |   11/25 (T)    |     null      |
 |            adjustments or optimizations            |   11/26 (W)    |     null      |
-|                       turkey                       |   11/27 (Th)   |     null      |
+|                       turkey                       |   11/27 (Th)   |     11/27     |
 |       general review, consulting, user test        |   11/28 (F)    |     null      |
 |                ! Project Finished !                |   11/29 (S)    |     null      |
 |               Presentation Outlined                |   12/01 (M)    |     null      |
