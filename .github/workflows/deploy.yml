@@ -2,6 +2,8 @@ name: Node.js Backend deploy to EC2
 
 on:
   push:
+    branches:
+      - dev
     paths:
       - "node_backend/**"
       - "*.json"
