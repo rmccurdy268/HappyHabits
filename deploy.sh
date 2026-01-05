@@ -27,36 +27,16 @@ docker run -d --name habitapp \
   --network habitapp-network \
   "$IMAGE_URI"
 
-# Debug: Check environment and file location
-echo "Debug info:"
-echo "  Current user: $(whoami)"
-echo "  HOME: $HOME"
-echo "  PWD: $(pwd)"
-echo "  Files in home:"
-ls -la $HOME/ | grep nginx || echo "  (nginx.conf not found in listing)"
 
-# Try multiple possible paths
-NGINX_CONF=""
-if [ -f "$HOME/nginx.conf" ]; then
-  NGINX_CONF="$HOME/nginx.conf"
-elif [ -f "/home/$(whoami)/nginx.conf" ]; then
-  NGINX_CONF="/home/$(whoami)/nginx.conf"
-elif [ -f "~/nginx.conf" ]; then
-  NGINX_CONF="~/nginx.conf"
-else
-  echo "Error: nginx.conf not found in any expected location"
-  echo "Searching for nginx.conf..."
-  find /home -name "nginx.conf" 2>/dev/null || echo "Not found in /home"
+echo "Verifying nginx.conf exists..."
+if [ ! -f "$HOME/nginx.conf" ]; then
+  echo "Error: nginx.conf not found at $HOME/nginx.conf"
   exit 1
 fi
-
-echo "Using nginx.conf at: $NGINX_CONF"
-echo "File details:"
-ls -lh "$NGINX_CONF"
 
 echo "Starting nginx container..."
 docker run -d --name habitapp-nginx \
   -p 80:80 \
-  -v "$NGINX_CONF:/etc/nginx/conf.d/default.conf:ro" \
+  -v $HOME/nginx.conf:/etc/nginx/conf.d/default.conf:ro \
   --network habitapp-network \
   nginx:alpine

@@ -102,23 +102,38 @@ jobs:
           source: "./deploy.sh"
           target: "/home/${{ secrets.EC2_USER }}/"
 
-      - name: Verify nginx.conf exists before copying
-        run: |
-          if [ ! -f "./node_backend/nginx.conf" ]; then
-            echo "Error: nginx.conf not found at ./node_backend/nginx.conf"
-            ls -la ./node_backend/
-            exit 1
-          fi
-          echo "nginx.conf found, proceeding with copy..."
-
-      - name: Copy nginx config to EC2
-        uses: appleboy/scp-action@v0.1.7
+      - name: Create nginx.conf on EC2
+        uses: appleboy/ssh-action@v1.0.2
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: "./node_backend/nginx.conf"
-          target: "/home/${{ secrets.EC2_USER }}/"
+          script: |
+            # Remove directory if it exists
+            sudo rm -rf $HOME/nginx.conf
+            # Create the file
+            cat > $HOME/nginx.conf << 'NGINX_EOF'
+            # HTTP server (ALB forwards HTTP to this)
+            server {
+                listen 80;
+                server_name happy-habits-backend.rhodric.com;
+
+                # Proxy settings
+                location / {
+                    proxy_pass http://habitapp:3000;
+                    proxy_http_version 1.1;
+                    proxy_set_header Upgrade $http_upgrade;
+                    proxy_set_header Connection 'upgrade';
+                    proxy_set_header Host $host;
+                    proxy_set_header X-Real-IP $remote_addr;
+                    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                    proxy_set_header X-Forwarded-Proto $scheme;
+                    proxy_cache_bypass $http_upgrade;
+                }
+            }
+            NGINX_EOF
+            chmod 644 $HOME/nginx.conf
+            echo "✓ nginx.conf created"
 
       - name: Execute remote deploy script
         uses: appleboy/ssh-action@v1.0.2
