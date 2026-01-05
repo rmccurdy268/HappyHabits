@@ -9,6 +9,7 @@ on:
       - "*.json"
       - ".github/workflows/deploy.yml"
       - "deploy.sh"
+      - "node_backend/nginx.conf"
   workflow_dispatch:
 
 jobs:

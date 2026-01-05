@@ -27,9 +27,15 @@ docker run -d --name habitapp \
   --network habitapp-network \
   "$IMAGE_URI"
 
+echo "Verifying nginx.conf exists..."
+if [ ! -f "$HOME/nginx.conf" ]; then
+  echo "Error: nginx.conf not found at $HOME/nginx.conf"
+  exit 1
+fi
+
 echo "Starting nginx container..."
 docker run -d --name habitapp-nginx \
   -p 80:80 \
-  -v $(pwd)/nginx.conf:/etc/nginx/conf.d/default.conf:ro \
+  -v $HOME/nginx.conf:/etc/nginx/conf.d/default.conf:ro \
   --network habitapp-network \
   nginx:alpine
