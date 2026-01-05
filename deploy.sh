@@ -12,8 +12,8 @@ echo "Pulling latest image: $IMAGE_URI"
 docker pull "$IMAGE_URI"
 
 echo "Stopping old containers..."
-docker stop habitapp habitapp-nginx || true
-docker rm habitapp habitapp-nginx || true
+docker stop habitapp habitapp || true
+docker rm habitapp habitapp || true
 
 echo "Creating network if it doesn't exist..."
 docker network create habitapp-network 2>/dev/null || true
@@ -26,7 +26,7 @@ docker run -d --name habitapp \
   "$IMAGE_URI"
 
 echo "Starting nginx container..."
-docker run -d --name habitapp-nginx \
+docker run -d --name habitapp \
   -p 80:80 \
   -v $(pwd)/nginx.conf:/etc/nginx/conf.d/default.conf:ro \
   --network habitapp-network \
