@@ -102,6 +102,15 @@ jobs:
           source: "./deploy.sh"
           target: "/home/${{ secrets.EC2_USER }}/"
 
+      - name: Verify nginx.conf exists before copying
+        run: |
+          if [ ! -f "./node_backend/nginx.conf" ]; then
+            echo "Error: nginx.conf not found at ./node_backend/nginx.conf"
+            ls -la ./node_backend/
+            exit 1
+          fi
+          echo "nginx.conf found, proceeding with copy..."
+
       - name: Copy nginx config to EC2
         uses: appleboy/scp-action@v0.1.7
         with:
