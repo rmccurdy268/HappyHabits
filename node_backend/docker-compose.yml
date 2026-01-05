@@ -1,0 +1,28 @@
+version: "3.8"
+
+services:
+  habitapp:
+    build: .
+    container_name: habitapp-backend
+    environment:
+      - PUBLISHABLE_KEY=${PUBLISHABLE_KEY}
+      - SERVICE_ROLE_KEY=${SERVICE_ROLE_KEY}
+    networks:
+      - app-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: habitapp-nginx
+    ports:
+      - "80:80" # Only HTTP - ALB handles HTTPS
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      # Remove ssl volume mount
+    depends_on:
+      - habitapp
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

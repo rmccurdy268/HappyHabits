@@ -11,12 +11,23 @@ aws ecr get-login-password --region "$REGION" \
 echo "Pulling latest image: $IMAGE_URI"
 docker pull "$IMAGE_URI"
 
-echo "Stopping old container..."
-docker stop habitapp || true
-docker rm habitapp || true
+echo "Stopping old containers..."
+docker stop habitapp habitapp-nginx || true
+docker rm habitapp habitapp-nginx || true
 
-echo "Starting new container..."
-docker run -d --name habitapp -p 80:3000 \
+echo "Creating network if it doesn't exist..."
+docker network create habitapp-network 2>/dev/null || true
+
+echo "Starting backend container..."
+docker run -d --name habitapp \
   -e PUBLISHABLE_KEY="$PUBLISHABLE_KEY" \
   -e SERVICE_ROLE_KEY="$SERVICE_ROLE_KEY" \
+  --network habitapp-network \
   "$IMAGE_URI"
+
+echo "Starting nginx container..."
+docker run -d --name habitapp-nginx \
+  -p 80:80 \
+  -v $(pwd)/nginx.conf:/etc/nginx/conf.d/default.conf:ro \
+  --network habitapp-network \
+  nginx:alpine

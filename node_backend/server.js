@@ -16,14 +16,18 @@ const service = new Service(supabase);
 // In development, allow all origins. In production, specify allowed origins.
 app.use(
   cors({
-    origin: "*", // Allow all origins in development
+    origin: [
+      "https://happy-habits-backend.rhodric.com",
+      "http://localhost:3000", // Keep for local dev
+    ],
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true, // Uncomment if you need to send cookies/credentials
-    // If using credentials, you must specify exact origins, e.g.:
-    // origin: ["http://localhost:19006", "http://192.168.1.100:19006"]
+    credentials: true,
   })
 );
+
+// Trust proxy (important when behind ALB)
+app.set("trust proxy", 1);
 
 // Middleware to parse JSON
 app.use(express.json());
