@@ -8,6 +8,7 @@ on:
       - "node_backend/**"
       - "*.json"
       - ".github/workflows/deploy.yml"
+      - "deploy.sh"
   workflow_dispatch:
 
 jobs:
