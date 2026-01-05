@@ -91,6 +91,7 @@ jobs:
           docker build --platform=linux/amd64 -t $ECR_REGISTRY/$ECR_REPOSITORY:latest ./artifact
           docker tag $ECR_REGISTRY/$ECR_REPOSITORY:latest $ECR_REGISTRY/$ECR_REPOSITORY:${version}
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:${version}
+
       - name: Copy deploy script to EC2
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -98,6 +99,15 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           source: "./deploy.sh"
+          target: "/home/${{ secrets.EC2_USER }}/"
+
+      - name: Copy nginx config to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "./node_backend/nginx.conf"
           target: "/home/${{ secrets.EC2_USER }}/"
 
       - name: Execute remote deploy script
