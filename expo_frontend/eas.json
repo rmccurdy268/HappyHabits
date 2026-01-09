@@ -1,0 +1,9 @@
+{
+  "build": {
+    "preview": {
+      "env": {
+        "APP_ENV": "preview"
+      }
+    }
+  }
+}

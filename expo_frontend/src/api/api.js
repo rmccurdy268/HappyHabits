@@ -1,6 +1,9 @@
 import axios from "axios";
+
 import { API_BASE_URL } from "./config";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+
+import Constants from "expo-constants";
 
 // Create axios instance with default config
 const api = axios.create({
